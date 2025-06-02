@@ -68,8 +68,8 @@ A full-stack, AI-powered, blockchain-integrated real estate platform built using
 
 ```bash
 # Clone repository
-git clone https://github.com/Top-Real/prohouse.git
-cd real-estate-platform
+git clone https://github.com/abhimishra21/RealState.git
+cd RealState
 
 # Install Frontend
 npm install
