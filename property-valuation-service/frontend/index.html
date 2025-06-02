@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Valuation Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Property Valuation Service</h1>
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <form id="valuationForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <input type="text" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Property Type</label>
+                    <select name="property_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="house">House</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="condo">Condo</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Bedrooms</label>
+                        <input type="number" name="bedrooms" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Bathrooms</label>
+                        <input type="number" name="bathrooms" min="1" step="0.5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Square Footage</label>
+                    <input type="number" name="square_footage" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Year Built</label>
+                    <input type="number" name="year_built" min="1800" max="2024" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Condition</label>
+                    <select name="condition" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Maintenance Level</label>
+                    <select name="maintenance_level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Renovation Status</label>
+                    <select name="renovation_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="recently_renovated">Recently Renovated</option>
+                        <option value="standard">Standard</option>
+                        <option value="needs_renovation">Needs Renovation</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Calculate Valuation
+                </button>
+            </form>
+            
+            <div id="result" class="mt-8 hidden">
+                <h2 class="text-xl font-semibold mb-4">Valuation Result</h2>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Estimated Value</p>
+                            <p id="value" class="text-lg font-semibold"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Confidence</p>
+                            <p id="confidence" class="text-lg font-semibold"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Explanation</p>
+                        <p id="explanation" class="mt-1 whitespace-pre-line"></p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Issues</p>
+                        <ul id="issues" class="mt-1 list-disc list-inside"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('valuationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Calculating...';
+
+                console.log('Sending data:', data); // Debug log
+
+                // First check if API is available
+                try {
+                    const healthCheck = await fetch('http://localhost:4000/api/health');
+                    if (!healthCheck.ok) {
+                        throw new Error('API server is not responding properly');
+                    }
+                } catch (error) {
+                    console.error('API Health Check Failed:', error);
+                    throw new Error('Cannot connect to the API server. Please make sure it is running on port 4000.');
+                }
+
+                const response = await fetch('http://localhost:4000/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                console.log('Response status:', response.status); // Debug log
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', errorText); // Debug log
+                    throw new Error(`API Error: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('API Response:', result); // Debug log
+                
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('value').textContent = `$${result.value.toLocaleString()}`;
+                document.getElementById('confidence').textContent = `${(result.confidence * 100).toFixed(1)}%`;
+                document.getElementById('explanation').textContent = result.explanation;
+                
+                const issuesList = document.getElementById('issues');
+                issuesList.innerHTML = '';
+                if (result.issues && result.issues.length > 0) {
+                    result.issues.forEach(issue => {
+                        const li = document.createElement('li');
+                        li.textContent = issue;
+                        issuesList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'No issues found';
+                    issuesList.appendChild(li);
+                }
+            } catch (error) {
+                console.error('Detailed error:', error); // Debug log
+                let errorMessage = 'An error occurred while calculating the valuation. ';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Cannot connect to the API server. Please make sure it is running on port 4000.';
+                } else {
+                    errorMessage += error.message;
+                }
+                alert(errorMessage);
+            } finally {
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Calculate Valuation';
+            }
+        });
+    </script>
+</body>
+</html>

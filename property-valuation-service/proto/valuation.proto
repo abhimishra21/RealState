@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package valuation;
+
+option go_package = "github.com/jsarcade/property-valuation-service/proto";
+
+// Property represents a real estate property
+message Property {
+  string address = 1;
+  string property_type = 2;
+  int32 bedrooms = 3;
+  int32 bathrooms = 4;
+  int32 square_footage = 5;
+  int32 year_built = 6;
+  string condition = 7;
+  string maintenance_level = 8;
+  string renovation_status = 9;
+  repeated string features = 10;
+}
+
+// ValuationResult represents the result of a property valuation
+message ValuationResult {
+  double value = 1;
+  double confidence = 2;
+  string explanation = 3;
+  repeated string issues = 4;
+}
+
+// ValuationRequest represents a request to value a property
+message ValuationRequest {
+  Property property = 1;
+}
+
+// ValuationResponse represents the response from a valuation request
+message ValuationResponse {
+  ValuationResult result = 1;
+}
+
+// ValuationService provides methods for property valuation
+service ValuationService {
+  // CalculateValuation calculates the value of a property
+  rpc CalculateValuation(ValuationRequest) returns (ValuationResponse) {}
+} 
